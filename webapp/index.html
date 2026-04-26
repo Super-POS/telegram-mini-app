@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#db271c" />
+  <title>CoffeeShop — Order</title>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+
+<!-- ─── Header ─────────────────────────────── -->
+<header class="app-header">
+  <div class="header-logo">☕</div>
+  <div class="header-title">CoffeeShop</div>
+  <button class="cart-btn" id="cartBtn" aria-label="View Cart">
+    🛒 <span class="cart-badge" id="cartBadge">0</span>
+  </button>
+</header>
+
+<!-- ─── Main Content ──────────────────────── -->
+<main class="app-main">
+
+  <!-- Loading -->
+  <div class="screen" id="screenLoading">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Loading menu…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="screen hidden" id="screenError">
+    <div class="error-icon">⚠️</div>
+    <p class="error-text" id="errorText">Something went wrong.</p>
+    <button class="btn btn-primary" onclick="loadMenu()">Retry</button>
+  </div>
+
+  <!-- Menu -->
+  <div class="screen hidden" id="screenMenu">
+    <!-- Category tabs -->
+    <div class="category-tabs" id="categoryTabs"></div>
+    <!-- Items grid -->
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+
+  <!-- Cart -->
+  <div class="screen hidden" id="screenCart">
+    <h2 class="section-title">🛒 Your Cart</h2>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-total" id="cartTotal"></div>
+    <div class="cart-actions">
+      <button class="btn btn-outline" onclick="showScreen('screenMenu')">Add More</button>
+      <button class="btn btn-primary" id="checkoutBtn" onclick="checkout()">Checkout</button>
+    </div>
+  </div>
+
+  <!-- Confirm -->
+  <div class="screen hidden" id="screenConfirm">
+    <h2 class="section-title">✅ Confirm Order</h2>
+    <div class="confirm-items" id="confirmItems"></div>
+    <div class="confirm-total" id="confirmTotal"></div>
+    <div class="cart-actions">
+      <button class="btn btn-outline" onclick="showScreen('screenCart')">← Back</button>
+      <button class="btn btn-primary" id="confirmBtn" onclick="confirmOrder()">Place Order</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ─── Item Detail Bottom Sheet ─────────── -->
+<div class="bottom-sheet-overlay hidden" id="bsOverlay" onclick="closeBottomSheet()"></div>
+<div class="bottom-sheet hidden" id="bottomSheet">
+  <div class="bs-handle"></div>
+  <div class="bs-image-wrap">
+    <img class="bs-image" id="bsImage" src="" alt="" />
+  </div>
+  <div class="bs-info">
+    <h3 class="bs-name" id="bsName"></h3>
+    <p class="bs-price" id="bsPrice"></p>
+  </div>
+  <div class="bs-qty-row">
+    <button class="qty-btn" onclick="changeQty(-1)">−</button>
+    <span class="qty-value" id="qtyValue">1</span>
+    <button class="qty-btn" onclick="changeQty(1)">+</button>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="addToCart()">Add to Cart</button>
+</div>
+
+<script src="scripts/app.js"></script>
+</body>
+</html>
