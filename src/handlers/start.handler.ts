@@ -9,11 +9,11 @@ export async function startHandler(ctx: BotContext): Promise<void> {
 
   if (account) {
     const keyboard = new InlineKeyboard()
-      .text('🛒 Browse Menu', 'cmd:menu')
-      .text('💰 Wallet', 'cmd:wallet');
+      .text('Browse Menu', 'cmd:menu')
+      .text('Wallet', 'cmd:wallet');
 
     if (config.webappUrlIsHttps) {
-      keyboard.row().webApp('🌐 Open Mini App', config.webappUrl);
+      keyboard.row().webApp('Open Mini App', config.webappUrl);
     }
 
     await ctx.reply(alreadyLinked(account.name), {
@@ -23,17 +23,17 @@ export async function startHandler(ctx: BotContext): Promise<void> {
     return;
   }
 
-  const keyboard = new InlineKeyboard()
-    .text('🔗 Link Existing Account', 'cmd:link')
-    .row()
-    .text('📋 Help', 'cmd:help');
+  const keyboard = new InlineKeyboard();
+  if (config.webappUrlIsHttps) {
+    keyboard.webApp('Open Mini App', config.webappUrl).row();
+  }
+  keyboard.text('Link Existing Account', 'cmd:link').row().text('Help', 'cmd:help');
 
-  await ctx.reply(
-    '☕ <b>Welcome to CoffeeShop Bot!</b>\n\n' +
-      'Order your favourite coffee, track orders, and manage your wallet — all from Telegram.\n\n' +
-      'Get started by linking your POS account:',
-    { parse_mode: 'HTML', reply_markup: keyboard },
-  );
+  const intro = config.webappUrlIsHttps
+    ? '<b>Welcome to CoffeeShop Bot!</b>\n\nOpen the Mini App to browse the image menu, order, and manage your wallet.'
+    : '<b>Welcome to CoffeeShop Bot!</b>\n\nOrder your favourite coffee, track orders, and manage your wallet from Telegram.\n\nGet started by linking your POS account:';
+
+  await ctx.reply(intro, { parse_mode: 'HTML', reply_markup: keyboard });
 }
 
 export async function linkHandler(ctx: BotContext): Promise<void> {

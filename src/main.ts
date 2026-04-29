@@ -92,6 +92,36 @@ async function bootstrap(): Promise<void> {
   // Health check
   app.get('/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
+  // ─── Customer Web Proxy ───────────────────
+  // Serves customer_web_v1 through the same public Telegram/ngrok origin.
+  app.all('*', async (req, res, next) => {
+    if (req.path.startsWith('/telegram/')) {
+      return next();
+    }
+    try {
+      const response = await axios({
+        method: req.method as 'get' | 'post' | 'put' | 'patch' | 'delete',
+        url: `${config.customerWebBaseUrl}${req.originalUrl}`,
+        data: ['GET', 'HEAD'].includes(req.method.toUpperCase()) ? undefined : req.body,
+        headers: {
+          ...req.headers,
+          host: undefined,
+        },
+        responseType: 'arraybuffer',
+        validateStatus: () => true,
+      });
+      Object.entries(response.headers).forEach(([key, value]) => {
+        if (value !== undefined) {
+          res.setHeader(key, value as string | string[]);
+        }
+      });
+      res.status(response.status).send(response.data);
+    } catch (err) {
+      console.error('[customer-web-proxy]', err);
+      res.status(502).send('Customer web proxy error');
+    }
+  });
+
   // ─── Webhook or Polling ─────────────────
   if (config.webhookUrl) {
     const webhookPath = '/telegram/webhook';
@@ -110,7 +140,7 @@ async function bootstrap(): Promise<void> {
 
   app.listen(config.webhookPort, () => {
     console.log(`[server] Listening on port ${config.webhookPort}`);
-    console.log(`[server] Mini App → http://localhost:${config.webhookPort}/webapp`);
+    console.log(`[server] Mini App → ${config.webappUrl}`);
   });
 
   // ─── Scheduler ──────────────────────────

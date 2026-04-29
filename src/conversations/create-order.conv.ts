@@ -5,7 +5,7 @@
  * Steps managed here are for the quantity-picking step.
  *
  * Flow:
- *   1. /menu command shows categories (inline keyboard)
+ *   1. /menu command opens the customer web Mini App when HTTPS is configured
  *   2. Tap category  → shows items in that category
  *   3. Tap item      → asks for quantity (sets conv step = 'ask_qty')
  *   4. User types qty → item added to cart
@@ -15,7 +15,7 @@
 
 import type { BotContext } from '../bot';
 import { InlineKeyboard } from 'grammy';
-import { getOrderingMenus } from '../api/menu.api';
+import { getPublicMenus } from '../api/menu.api';
 import { placeOrder } from '../api/order.api';
 import {
   cartSummary,
@@ -29,36 +29,30 @@ import { config } from '../config';
 // ─── Show Categories ─────────────────────────
 
 export async function showMenuCategories(ctx: BotContext): Promise<void> {
-  if (!ctx.session.linkedAccount) {
-    await ctx.reply(notLinkedMessage(), { parse_mode: 'HTML' });
-    return;
-  }
-
   // ── Preferred: open the Mini App as a popup ──────────────────────────
   if (config.webappUrlIsHttps) {
-    const { accessToken } = ctx.session.linkedAccount;
-    const url =
-      `${config.webappUrl}?` +
-      `token=${encodeURIComponent(accessToken)}&` +
-      `api=${encodeURIComponent(config.publicUrl)}`;
-
-    const keyboard = new InlineKeyboard().webApp('☕ Browse Menu & Order', url);
+    const keyboard = new InlineKeyboard().webApp('Browse Menu & Order', config.webappUrl);
     await ctx.reply(
-      '☕ <b>Our Coffee Menu</b>\n\nTap below to browse items and place your order:',
+      '<b>Our Coffee Menu</b>\n\nTap below to browse the image menu and place your order:',
       { parse_mode: 'HTML', reply_markup: keyboard },
     );
     return;
   }
 
+  if (!ctx.session.linkedAccount) {
+    await ctx.reply(notLinkedMessage(), { parse_mode: 'HTML' });
+    return;
+  }
+
   // ── Fallback: inline keyboard (no HTTPS) ─────────────────────────────
-  const loading = await ctx.reply('☕ Loading menu…');
+  const loading = await ctx.reply('Loading menu…');
 
   try {
-    const categories = await getOrderingMenus(ctx.session.linkedAccount.accessToken);
+    const categories = await getPublicMenus();
     await ctx.api.deleteMessage(ctx.chat!.id, loading.message_id).catch(() => null);
 
     if (!categories.length) {
-      await ctx.reply('😔 No menu items available right now.', { parse_mode: 'HTML' });
+      await ctx.reply('No menu items available right now.', { parse_mode: 'HTML' });
       return;
     }
 
@@ -67,9 +61,9 @@ export async function showMenuCategories(ctx: BotContext): Promise<void> {
       keyboard.text(`${cat.name}`, `cat:${cat.id}`);
       if ((i + 1) % 2 === 0) keyboard.row();
     });
-    keyboard.row().text('🛒 View Cart', 'cmd:cart');
+    keyboard.row().text('View Cart', 'cmd:cart');
 
-    await ctx.reply('☕ <b>Our Menu</b>\n\nSelect a category:', {
+    await ctx.reply('<b>Our Menu</b>\n\nSelect a category:', {
       parse_mode: 'HTML',
       reply_markup: keyboard,
     });
@@ -92,7 +86,7 @@ export async function showCategoryItems(
   }
 
   try {
-    const categories = await getOrderingMenus(ctx.session.linkedAccount.accessToken);
+    const categories = await getPublicMenus();
     const category = categories.find((c) => c.id === categoryId);
 
     if (!category || !category.menus?.length) {
@@ -103,15 +97,15 @@ export async function showCategoryItems(
     const keyboard = new InlineKeyboard();
     category.menus.forEach((item: MenuItem) => {
       keyboard
-        .text(`${item.name} — $${item.unit_price.toFixed(2)}`, `item:${item.id}`)
+        .text(`${item.name} — ${item.unit_price.toFixed(0)} KHR`, `item:${item.id}`)
         .row();
     });
     keyboard
-      .text('⬅️ Back to Categories', 'cmd:menu')
-      .text('🛒 Cart', 'cmd:cart');
+      .text('Back to Categories', 'cmd:menu')
+      .text('Cart', 'cmd:cart');
 
     await ctx.editMessageText(
-      `☕ <b>${category.name}</b>\n\nSelect an item to add to cart:`,
+      `<b>${category.name}</b>\n\nSelect an item to add to cart:`,
       { parse_mode: 'HTML', reply_markup: keyboard },
     );
     await ctx.answerCallbackQuery();
@@ -129,7 +123,7 @@ export async function askItemQuantity(ctx: BotContext, itemId: number): Promise<
   }
 
   try {
-    const categories = await getOrderingMenus(ctx.session.linkedAccount.accessToken);
+    const categories = await getPublicMenus();
     let foundItem: MenuItem | undefined;
     for (const cat of categories) {
       foundItem = cat.menus?.find((m) => m.id === itemId);
@@ -153,7 +147,7 @@ export async function askItemQuantity(ctx: BotContext, itemId: number): Promise<
 
     await ctx.answerCallbackQuery();
     await ctx.reply(
-      `➕ <b>${foundItem.name}</b> — $${foundItem.unit_price.toFixed(2)}\n\n` +
+      `<b>${foundItem.name}</b> — ${foundItem.unit_price.toFixed(0)} KHR\n\n` +
         `How many would you like? (Enter a number, e.g. <code>1</code>)`,
       { parse_mode: 'HTML' },
     );
@@ -173,7 +167,7 @@ export async function handleCreateOrderStep(ctx: BotContext): Promise<void> {
   if (step === 'ask_qty') {
     const qty = parseInt(text, 10);
     if (isNaN(qty) || qty < 1 || qty > 99) {
-      await ctx.reply('⚠️ Please enter a valid number between 1 and 99.');
+      await ctx.reply('Please enter a valid number between 1 and 99.');
       return;
     }
 
@@ -193,13 +187,13 @@ export async function handleCreateOrderStep(ctx: BotContext): Promise<void> {
     ctx.session.conv = { name: null, step: null, data: {} };
 
     const keyboard = new InlineKeyboard()
-      .text('➕ Add More', 'cmd:menu')
-      .text('🛒 View Cart', 'cmd:cart')
+      .text('Add More', 'cmd:menu')
+      .text('View Cart', 'cmd:cart')
       .row()
-      .text('✅ Checkout', 'cmd:checkout');
+      .text('Checkout', 'cmd:checkout');
 
     await ctx.reply(
-      `✅ <b>${data.itemName as string} x${qty}</b> added to cart!\n\n` + cartSummary(cart),
+      `<b>${data.itemName as string} x${qty}</b> added to cart!\n\n` + cartSummary(cart),
       { parse_mode: 'HTML', reply_markup: keyboard },
     );
   }
@@ -209,7 +203,7 @@ export async function handleCreateOrderStep(ctx: BotContext): Promise<void> {
 
 export async function showCart(ctx: BotContext): Promise<void> {
   // When the webapp is active, redirect there (cart lives in the webapp)
-  if (config.webappUrlIsHttps && ctx.session.linkedAccount) {
+  if (config.webappUrlIsHttps) {
     await showMenuCategories(ctx);
     return;
   }
@@ -217,16 +211,16 @@ export async function showCart(ctx: BotContext): Promise<void> {
   const cart = ctx.session.cart;
 
   if (!cart.length) {
-    const keyboard = new InlineKeyboard().text('☕ Browse Menu', 'cmd:menu');
+    const keyboard = new InlineKeyboard().text('Browse Menu', 'cmd:menu');
     await ctx.reply(cartSummary(cart), { parse_mode: 'HTML', reply_markup: keyboard });
     return;
   }
 
   const keyboard = new InlineKeyboard()
-    .text('✅ Checkout', 'cmd:checkout')
-    .text('🗑️ Clear Cart', 'cmd:clear_cart')
+    .text('Checkout', 'cmd:checkout')
+    .text('Clear Cart', 'cmd:clear_cart')
     .row()
-    .text('➕ Add More', 'cmd:menu');
+    .text('Add More', 'cmd:menu');
 
   await ctx.reply(cartSummary(cart), {
     parse_mode: 'HTML',
@@ -247,12 +241,12 @@ export async function showCheckout(ctx: BotContext): Promise<void> {
   const total = cart.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
 
   const keyboard = new InlineKeyboard()
-    .text('✅ Confirm Order', 'cmd:confirm_order')
-    .text('❌ Cancel', 'cmd:cart');
+    .text('Confirm Order', 'cmd:confirm_order')
+    .text('Cancel', 'cmd:cart');
 
   await ctx.editMessageText(
     cartSummary(cart) +
-      `\n\n💰 <b>Total: $${total.toFixed(2)}</b>\n\nConfirm your order?`,
+      `\n\n<b>Total: ${total.toFixed(0)} KHR</b>\n\nConfirm your order?`,
     { parse_mode: 'HTML', reply_markup: keyboard },
   );
   await ctx.answerCallbackQuery();
@@ -273,13 +267,13 @@ export async function confirmAndPlaceOrder(ctx: BotContext): Promise<void> {
   }
 
   await ctx.answerCallbackQuery();
-  const loadingMsg = await ctx.reply('⏳ Placing your order…');
+  const loadingMsg = await ctx.reply('Placing your order…');
 
   try {
     const cartPayload = cart.map((i) => ({ menu_id: i.menuId, quantity: i.quantity }));
     const order = await placeOrder(ctx.session.linkedAccount.accessToken, {
       cart: JSON.stringify(cartPayload),
-      channel: 'TELEGRAM',
+      channel: 'telegram',
     });
 
     ctx.session.cart = [];
@@ -287,8 +281,8 @@ export async function confirmAndPlaceOrder(ctx: BotContext): Promise<void> {
     await ctx.api.deleteMessage(ctx.chat!.id, loadingMsg.message_id).catch(() => null);
 
     const keyboard = new InlineKeyboard()
-      .text('📋 Track Order', `order:track:${order.id}`)
-      .text('🛒 New Order', 'cmd:menu');
+      .text('Track Order', `order:track:${order.id}`)
+      .text('New Order', 'cmd:menu');
 
     await ctx.reply(orderReceipt(order), {
       parse_mode: 'HTML',

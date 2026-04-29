@@ -80,11 +80,7 @@ export async function handleLinkAccountStep(ctx: BotContext): Promise<void> {
         .text('💰 Wallet', 'cmd:wallet');
 
       if (config.webappUrlIsHttps) {
-        const url =
-          `${config.webappUrl}?` +
-          `token=${encodeURIComponent(accessToken)}&` +
-          `api=${encodeURIComponent(config.publicUrl)}`;
-        keyboard.row().webApp('☕ Browse Menu & Order', url);
+        keyboard.row().webApp('Browse Menu & Order', config.webappUrl);
       } else {
         keyboard.row().text('🛒 Browse Menu', 'cmd:menu');
       }

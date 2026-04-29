@@ -91,7 +91,7 @@ export function createBot(): Bot<BotContext> {
         await ctx.reply(
           `✅ <b>Order Placed!</b>\n` +
             `📋 Receipt: <code>#${payload.receipt_number}</code>\n` +
-            `💰 Total: $${Number(payload.total ?? 0).toFixed(2)}\n\n` +
+            `💰 Total: ${Number(payload.total ?? 0).toFixed(0)} KHR\n\n` +
             `Use /status to track your order.`,
           { parse_mode: 'HTML', reply_markup: keyboard },
         );

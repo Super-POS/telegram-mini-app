@@ -5,14 +5,14 @@ import { config } from '../config';
 
 export async function helpHandler(ctx: BotContext): Promise<void> {
   const keyboard = new InlineKeyboard()
-    .text('🛒 Menu', 'cmd:menu')
-    .text('📦 My Orders', 'cmd:status')
+    .text('Menu', 'cmd:menu')
+    .text('My Orders', 'cmd:status')
     .row()
-    .text('💰 Wallet', 'cmd:wallet')
-    .text('💳 Deposit', 'cmd:deposit');
+    .text('Wallet', 'cmd:wallet')
+    .text('Deposit', 'cmd:deposit');
 
   if (config.webappUrlIsHttps) {
-    keyboard.row().webApp('🌐 Open Mini App', config.webappUrl);
+    keyboard.row().webApp('Open Mini App', config.webappUrl);
   }
 
   await ctx.reply(helpMessage(), {

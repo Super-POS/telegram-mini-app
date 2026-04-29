@@ -13,8 +13,28 @@ document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themePara
 
 // Parse query params for API auth token passed by the bot
 const params = new URLSearchParams(window.location.search);
-const ACCESS_TOKEN = params.get('token') || '';
+let ACCESS_TOKEN = params.get('token') || '';
 const API_BASE = params.get('api') || 'http://localhost:9003';
+
+async function ensureTelegramLogin() {
+  if (ACCESS_TOKEN) return ACCESS_TOKEN;
+  try {
+    const initData = tg.initData || '';
+    if (!initData) throw new Error('Missing Telegram init data');
+    const res = await fetch(API_BASE + '/api/account/auth/telegram-webapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, platform: 'TelegramMiniApp' }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json?.message || 'Telegram login failed');
+    ACCESS_TOKEN = json.token || '';
+    if (!ACCESS_TOKEN) throw new Error('Missing token from server');
+    return ACCESS_TOKEN;
+  } catch (e) {
+    throw e instanceof Error ? e : new Error('Telegram login failed');
+  }
+}
 
 // ─── State ─────────────────────────────────
 let allCategories = [];
@@ -80,10 +100,7 @@ function addItemToCart(item, qty) {
 async function loadMenu() {
   showScreen('screenLoading');
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (ACCESS_TOKEN) headers['Authorization'] = 'Bearer ' + ACCESS_TOKEN;
-
-    const res = await fetch(API_BASE + '/api/cashier/ordering/menus', { headers });
+    const res = await fetch(API_BASE + '/api/share/menus');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     allCategories = json.data || [];
@@ -274,25 +291,24 @@ async function confirmOrder() {
 
   try {
     const cartPayload = JSON.stringify(cart.map((i) => ({ menu_id: i.id, quantity: i.qty })));
-
-    const headers = { 'Content-Type': 'application/json' };
-    if (ACCESS_TOKEN) headers['Authorization'] = 'Bearer ' + ACCESS_TOKEN;
+    const token = await ensureTelegramLogin();
+    const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token };
 
     const res = await fetch(API_BASE + '/api/customer/orders', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ cart: cartPayload, channel: 'TELEGRAM' }),
+      body: JSON.stringify({ cart: cartPayload, channel: 'telegram' }),
     });
 
     const json = await res.json();
-    if (!res.ok || !json.success) throw new Error(json.message || 'Order failed');
+    if (!res.ok) throw new Error(json.message || 'Order failed');
 
     // Send result back to the bot
     const receiptData = JSON.stringify({
       type: 'order_placed',
       order_id: json.data.id,
       receipt_number: json.data.receipt_number,
-      total: json.data.total_amount,
+      total: json.data.total_price,
     });
     tg.sendData(receiptData);
 

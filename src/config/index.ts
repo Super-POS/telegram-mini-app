@@ -13,7 +13,8 @@ export const config = {
   adminPassword: process.env.ADMIN_PASSWORD ?? '',
   webhookUrl: process.env.WEBHOOK_URL ?? '',
   webhookPort: parseInt(process.env.WEBHOOK_PORT ?? '3001', 10),
-  webappUrl: process.env.WEBAPP_URL ?? 'http://localhost:3001/webapp',
+  webappUrl: process.env.WEBAPP_URL ?? 'http://localhost:3000',
+  customerWebBaseUrl: (process.env.CUSTOMER_WEB_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, ''),
   adminChatIds: (process.env.ADMIN_CHAT_IDS ?? '')
     .split(',')
     .map((s) => s.trim())
