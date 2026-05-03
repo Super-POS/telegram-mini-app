@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import axios from 'axios';
 import { createBot } from './bot';
+import { createSessionStorage } from './storage/session-storage.factory';
 import { notifier } from './notifications/notifier';
 import { customerStore } from './notifications/customer-store';
 import { startMonthlyReportScheduler } from './scheduler/monthly-report.scheduler';
@@ -15,7 +16,8 @@ import type {
 
 async function bootstrap(): Promise<void> {
   // ─── Bot ────────────────────────────────
-  const bot = createBot();
+  const sessionStorage = createSessionStorage();
+  const bot = createBot(sessionStorage);
   notifier.setBot(bot);
 
   // ─── Express server ─────────────────────
@@ -133,6 +135,11 @@ async function bootstrap(): Promise<void> {
     await bot.api.setWebhook(`${config.webhookUrl}${webhookPath}`);
     console.log(`[bot] Webhook set → ${config.webhookUrl}${webhookPath}`);
   } else {
+    try {
+      await bot.api.deleteWebhook({ drop_pending_updates: false });
+    } catch (e) {
+      console.warn('[bot] deleteWebhook failed (continuing with polling):', e);
+    }
     bot.start({
       onStart: (info) => console.log(`[bot] Polling started as @${info.username}`),
     });
@@ -150,6 +157,9 @@ async function bootstrap(): Promise<void> {
   const shutdown = async () => {
     console.log('[bot] Shutting down…');
     await bot.stop();
+    if (typeof sessionStorage.close === 'function') {
+      await sessionStorage.close().catch(() => null);
+    }
     process.exit(0);
   };
   process.once('SIGINT', shutdown);

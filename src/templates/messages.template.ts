@@ -64,6 +64,21 @@ export function alreadyLinked(name: string): string {
   return `✅ You're already linked as <b>${name}</b>.\n\nUse /help to see available commands.`;
 }
 
+/** After /start — POS account is created or matched by Telegram ID and session is logged in. */
+export function telegramAutoWelcome(name: string): string {
+  return (
+    `☕ <b>Welcome, ${name}!</b>\n\n` +
+    `You're signed in with your Telegram account.\n\n` +
+    `<b>Quick Commands:</b>\n` +
+    `/menu — Browse our coffee menu\n` +
+    `/cart — View your cart\n` +
+    `/order — Place an order\n` +
+    `/deposit — Top up wallet\n` +
+    `/status — Track latest order\n` +
+    `/help — Show all commands`
+  );
+}
+
 // ─── Cart ────────────────────────────────────
 
 export function cartSummary(cart: CartItem[]): string {
@@ -228,7 +243,7 @@ export function helpMessage(): string {
     `/wallet — Check balance & history\n` +
     `/rewards — View reward points\n\n` +
     `<b>⚙️ Account</b>\n` +
-    `/start — Link / re-link account\n` +
+    `/start — Sign in with Telegram (creates account if new)\n` +
     `/profile — View your profile\n` +
     `/unlink — Unlink account\n\n` +
     `<b>👑 Admin Only</b>\n` +

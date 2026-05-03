@@ -13,12 +13,19 @@ import { walletHandler, walletHistoryHandler, rewardsHandler } from './wallet.ha
 import { statusHandler, trackOrder } from './status.handler';
 import { helpHandler } from './help.handler';
 import { handleReportCallback } from './report.handler';
+import { startHandler } from './start.handler';
 
 export async function callbackQueryHandler(ctx: BotContext): Promise<void> {
   const data = ctx.callbackQuery?.data;
   if (!data) return;
 
   // ─── Simple commands ─────────────────────
+
+  if (data === 'cmd:start') {
+    await ctx.answerCallbackQuery();
+    await startHandler(ctx);
+    return;
+  }
 
   if (data === 'cmd:menu') {
     await ctx.answerCallbackQuery();

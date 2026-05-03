@@ -1,8 +1,7 @@
+import type { StorageAdapter } from 'grammy';
 import { Bot, Context, InlineKeyboard, session } from 'grammy';
 import type { SessionData } from './types';
 import { config } from './config';
-import { FileSessionStorage } from './storage/file-session.storage';
-import path from 'path';
 
 // ─── Context Type ────────────────────────────
 
@@ -23,13 +22,9 @@ function initialSession(): SessionData {
 
 // ─── Bot Factory ─────────────────────────────
 
-export function createBot(): Bot<BotContext> {
+export function createBot(sessionStorage: StorageAdapter<SessionData>): Bot<BotContext> {
   const bot = new Bot<BotContext>(config.botToken);
 
-  // ─── Session middleware (persistent file storage) ──
-  const sessionStorage = new FileSessionStorage<SessionData>(
-    path.join(__dirname, '..', 'data', 'sessions.json'),
-  );
   bot.use(
     session({
       initial: initialSession,
