@@ -61,8 +61,12 @@ export const config = {
     .filter(Boolean)
     .map(Number),
   isDev: process.env.NODE_ENV !== 'production',
+  /** Show GrammY webApp() buttons. True for https:// URLs, or http:// when WEBAPP_ALLOW_HTTP is set (self-hosted; Telegram may still block on some clients). */
   get webappUrlIsHttps(): boolean {
-    return this.webappUrl.startsWith('https://');
+    const u = this.webappUrl.trim().toLowerCase();
+    if (u.startsWith('https://')) return true;
+    const allowHttp = ['true', '1', 'yes'].includes((process.env.WEBAPP_ALLOW_HTTP ?? '').trim().toLowerCase());
+    return allowHttp && u.startsWith('http://');
   },
   /** Public origin of the bot's Express server (= ngrok origin when tunnelling).
    *  Derived from WEBAPP_URL so no extra env var is needed.
