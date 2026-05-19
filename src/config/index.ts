@@ -50,11 +50,12 @@ export const config = {
     process.env.WEBAPP_URL ||
     process.env.CUSTOMER_WEB_BASE_URL ||
     'http://localhost:3000'
-  ).replace(/\/$/, ''),
-  customerWebBaseUrl: (process.env.CUSTOMER_WEB_BASE_URL ?? process.env.WEBAPP_URL ?? 'http://localhost:3000').replace(
-    /\/$/,
-    '',
-  ),
+  )
+    .trim()
+    .replace(/\/$/, ''),
+  customerWebBaseUrl: (process.env.CUSTOMER_WEB_BASE_URL ?? process.env.WEBAPP_URL ?? 'http://localhost:3000')
+    .trim()
+    .replace(/\/$/, ''),
   adminChatIds: (process.env.ADMIN_CHAT_IDS ?? '')
     .split(',')
     .map((s) => s.trim())
