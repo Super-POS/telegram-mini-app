@@ -8,7 +8,8 @@
     "start": "node dist/main.js",
     "dev": "nodemon",
     "typecheck": "tsc --noEmit",
-    "tunnel": "cloudflared tunnel --url http://127.0.0.1:${WEBHOOK_PORT:-3002}"
+    "tunnel": "cloudflared tunnel --url http://127.0.0.1:${WEBHOOK_PORT:-3002}",
+    "webhook:register": "node scripts/set-vercel-webhook.mjs"
   },
   "dependencies": {
     "axios": "^1.7.2",
@@ -23,6 +24,7 @@
     "@types/node": "^20.14.0",
     "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.20.0",
+    "@vercel/node": "^3.2.29",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.2"
