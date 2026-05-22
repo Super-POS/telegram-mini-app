@@ -14,7 +14,18 @@ document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themePara
 // Parse query params for API auth token passed by the bot
 const params = new URLSearchParams(window.location.search);
 let ACCESS_TOKEN = params.get('token') || '';
-const API_BASE = params.get('api') || 'http://localhost:9003';
+
+/** API origin (no trailing slash). ?api= overrides. Local dev → localhost:9003; deployed → same origin (/api proxied on Vercel). */
+function resolveApiBase() {
+  const fromQuery = params.get('api');
+  if (fromQuery) return fromQuery.replace(/\/$/, '');
+  const { hostname, origin } = window.location;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:9003';
+  }
+  return origin;
+}
+const API_BASE = resolveApiBase();
 
 async function ensureTelegramLogin() {
   if (ACCESS_TOKEN) return ACCESS_TOKEN;
