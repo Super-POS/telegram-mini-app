@@ -2,6 +2,8 @@
    Brand Tokens
 ───────────────────────────────────────────── */
 :root {
+  color-scheme: light;
+
   /* Primary Colors */
   --color-red:     #db271c;
   --color-black:   #000000;
@@ -16,11 +18,11 @@
   --color-pink:    #f8b6c4;
   --color-purple:  #a57eb1;
 
-  /* Semantic */
-  --color-bg:          var(--tg-theme-bg-color,       #ffffff);
-  --color-surface:     var(--tg-theme-secondary-bg-color, #f5f0e8);
-  --color-text:        var(--tg-theme-text-color,     #1a1a1a);
-  --color-subtext:     var(--tg-theme-hint-color,     #6b6b6b);
+  /* Semantic — fixed light values; ignore Telegram dark theme injection */
+  --color-bg:          #ffffff;
+  --color-surface:     #f5f0e8;
+  --color-text:        #1a1a1a;
+  --color-subtext:     #6b6b6b;
   --color-border:      rgba(0,0,0,0.08);
   --color-primary:     var(--color-red);
   --color-primary-dk:  var(--color-plum);
