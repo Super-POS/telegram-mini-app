@@ -14,6 +14,7 @@ import { statusHandler, trackOrder } from './status.handler';
 import { helpHandler } from './help.handler';
 import { handleReportCallback } from './report.handler';
 import { startHandler } from './start.handler';
+import { handleBadgeCallback } from '../conversations/badge.conv';
 
 export async function callbackQueryHandler(ctx: BotContext): Promise<void> {
   const data = ctx.callbackQuery?.data;
@@ -121,6 +122,13 @@ export async function callbackQueryHandler(ctx: BotContext): Promise<void> {
   if (trackMatch) {
     await ctx.answerCallbackQuery();
     await trackOrder(ctx, parseInt(trackMatch[1], 10));
+    return;
+  }
+
+  // Badge option tap: bq:0, bq:1, …
+  const bqMatch = data.match(/^bq:(\d+)$/);
+  if (bqMatch) {
+    await handleBadgeCallback(ctx, parseInt(bqMatch[1], 10));
     return;
   }
 

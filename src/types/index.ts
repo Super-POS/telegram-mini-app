@@ -25,6 +25,7 @@ export type ConvName =
   | 'linkAccount'
   | 'createOrder'
   | 'deposit'
+  | 'badge'
   | null;
 
 export interface ConvState {
@@ -104,11 +105,19 @@ export interface WalletInfo {
   customer_id: number;
 }
 
+export interface BadgeQuestion {
+  id?: number;
+  question: string;
+  options: string[];
+}
+
 export interface RewardInfo {
   points: number;
   tier: string;
   total_earned: number;
   total_redeemed: number;
+  // badge column in reward_point is a plain string (badge name/label)
+  badge?: string | null;
 }
 
 export interface CustomerProfile {

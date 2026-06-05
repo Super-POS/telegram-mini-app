@@ -1,5 +1,5 @@
 import { apiClient, withAuth } from './client';
-import type { ApiResponse, WalletInfo, Deposit, RewardInfo } from '../types';
+import type { ApiResponse, WalletInfo, Deposit, RewardInfo, BadgeQuestion } from '../types';
 
 export async function getWalletBalance(token: string): Promise<WalletInfo> {
   const res = await apiClient.get<ApiResponse<WalletInfo>>(
@@ -47,6 +47,24 @@ export async function getRewards(token: string): Promise<RewardInfo> {
     withAuth(token),
   );
   if (!res.data.data) throw new Error('Failed to fetch rewards');
+  return res.data.data;
+}
+
+export async function getBadgeQuestions(token: string): Promise<BadgeQuestion[]> {
+  const res = await apiClient.get<ApiResponse<BadgeQuestion[]>>(
+    '/api/customer/rewards/badge/questions',
+    withAuth(token),
+  );
+  return (res.data.data as BadgeQuestion[]) ?? [];
+}
+
+export async function assignBadge(token: string, answers: string[]): Promise<{ badge: string }> {
+  const res = await apiClient.post<ApiResponse<{ badge: string }>>(
+    '/api/customer/rewards/badge',
+    { answers },
+    withAuth(token),
+  );
+  if (!res.data.data) throw new Error(res.data.message ?? 'Badge assignment failed');
   return res.data.data;
 }
 

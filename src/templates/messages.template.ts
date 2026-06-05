@@ -200,6 +200,12 @@ export function rewardProfile(reward: RewardInfo): string {
   );
 }
 
+// ─── Badge ───────────────────────────────────
+
+export function badgeDisplay(badge: string): string {
+  return `🏅 <b>Your Badge</b>\n${THIN}\n<b>${badge}</b>`;
+}
+
 // ─── Monthly Report ──────────────────────────
 
 export function monthlyReport(
