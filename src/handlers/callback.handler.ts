@@ -14,6 +14,7 @@ import { statusHandler, trackOrder } from './status.handler';
 import { helpHandler } from './help.handler';
 import { handleReportCallback } from './report.handler';
 import { startHandler } from './start.handler';
+import { hubTabHandler, type HubTab } from './hub.handler';
 
 export async function callbackQueryHandler(ctx: BotContext): Promise<void> {
   const data = ctx.callbackQuery?.data;
@@ -121,6 +122,13 @@ export async function callbackQueryHandler(ctx: BotContext): Promise<void> {
   if (trackMatch) {
     await ctx.answerCallbackQuery();
     await trackOrder(ctx, parseInt(trackMatch[1], 10));
+    return;
+  }
+
+  // Hub tab: hub:miniapp, hub:qr, hub:badge, hub:events
+  const hubMatch = data.match(/^hub:(miniapp|qr|badge|events)$/);
+  if (hubMatch) {
+    await hubTabHandler(ctx, hubMatch[1] as HubTab);
     return;
   }
 

@@ -46,6 +46,7 @@ export function createBot(sessionStorage: StorageAdapter<SessionData>): Bot<BotC
   const { reportHandler } = require('./handlers/report.handler');
   const { broadcastHandler } = require('./handlers/broadcast.handler');
   const { callbackQueryHandler } = require('./handlers/callback.handler');
+  const { hubHandler } = require('./handlers/hub.handler');
   const { startDeposit } = require('./conversations/deposit.conv');
   const { showMenuCategories, showCart } = require('./conversations/create-order.conv');
 
@@ -63,6 +64,7 @@ export function createBot(sessionStorage: StorageAdapter<SessionData>): Bot<BotC
   bot.command('report', reportHandler);
   bot.command('broadcast', broadcastHandler);
   bot.command('help', helpHandler);
+  bot.command('hub', (ctx: BotContext) => hubHandler(ctx));
 
   // ─── Callback queries ────────────────────
   bot.on('callback_query:data', callbackQueryHandler);

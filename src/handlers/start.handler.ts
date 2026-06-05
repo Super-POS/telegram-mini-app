@@ -11,6 +11,7 @@ function homeKeyboard(): InlineKeyboard {
   if (config.webappUrlIsHttps) {
     keyboard.row().webApp('Open Mini App', config.webappUrl);
   }
+  keyboard.row().text('Hub', 'hub:miniapp');
   keyboard.row().text('Link Existing Account', 'cmd:link').text('Help', 'cmd:help');
   return keyboard;
 }
