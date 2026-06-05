@@ -124,6 +124,19 @@ async function bootstrap(): Promise<void> {
     }
   });
 
+  // ─── Register bot commands (hamburger menu) ─
+  await bot.api.setMyCommands([
+    { command: 'start', description: 'Get started' },
+    { command: 'miniapp', description: 'Open Mini App' },
+    { command: 'qr', description: 'My QR Code' },
+    { command: 'badge', description: 'Badge Display' },
+    { command: 'events', description: 'Event Schedule' },
+    { command: 'menu', description: 'Browse menu' },
+    { command: 'wallet', description: 'My wallet' },
+    { command: 'status', description: 'Order status' },
+    { command: 'help', description: 'Help' },
+  ]);
+
   // ─── Webhook or Polling ─────────────────
   if (config.webhookUrl) {
     const webhookPath = '/telegram/webhook';
