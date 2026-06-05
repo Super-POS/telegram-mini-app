@@ -1,5 +1,5 @@
 import { apiClient, withAuth } from './client';
-import type { ApiResponse, WalletInfo, Deposit, RewardInfo, BadgeQuestion } from '../types';
+import type { ApiResponse, WalletInfo, Deposit, RewardInfo, BadgeQuestion, BadgeInfo } from '../types';
 
 export async function getWalletBalance(token: string): Promise<WalletInfo> {
   const res = await apiClient.get<ApiResponse<WalletInfo>>(
@@ -58,8 +58,13 @@ export async function getBadgeQuestions(token: string): Promise<BadgeQuestion[]>
   return (res.data.data as BadgeQuestion[]) ?? [];
 }
 
-export async function assignBadge(token: string, answers: string[]): Promise<{ badge: string }> {
-  const res = await apiClient.post<ApiResponse<{ badge: string }>>(
+export interface AssignBadgeResult {
+  badge: BadgeInfo | string;
+  rank_tier?: number;
+}
+
+export async function assignBadge(token: string, answers: string[]): Promise<AssignBadgeResult> {
+  const res = await apiClient.post<ApiResponse<AssignBadgeResult>>(
     '/api/customer/rewards/badge',
     { answers },
     withAuth(token),

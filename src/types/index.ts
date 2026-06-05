@@ -111,13 +111,19 @@ export interface BadgeQuestion {
   options: string[];
 }
 
+export interface BadgeInfo {
+  name: string;
+  description?: string;
+  emoji?: string;
+}
+
 export interface RewardInfo {
   points: number;
   tier: string;
+  rank_tier?: number;
   total_earned: number;
   total_redeemed: number;
-  // badge column in reward_point is a plain string (badge name/label)
-  badge?: string | null;
+  badge?: BadgeInfo | string | null;
 }
 
 export interface CustomerProfile {

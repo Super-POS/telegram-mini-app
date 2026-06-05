@@ -35,7 +35,7 @@ export async function badgeHandler(ctx: BotContext): Promise<void> {
     await ctx.api.deleteMessage(ctx.chat!.id, loading.message_id).catch(() => null);
 
     if (rewards.badge) {
-      await ctx.reply(badgeDisplay(rewards.badge), { parse_mode: 'HTML' });
+      await ctx.reply(badgeDisplay(rewards.badge as string, rewards.rank_tier), { parse_mode: 'HTML' });
     } else {
       await ctx.reply(
         '🏅 <b>Badge Display</b>\n\nYou don\'t have a badge yet!\n\nAnswer a few quick questions and our AI will generate your unique badge. Ready?',
