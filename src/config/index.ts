@@ -38,7 +38,8 @@ function require_env(key: string): string {
 
 export const config = {
   botToken: require_env('BOT_TOKEN'),
-  apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:9003',
+  // Strip a trailing /api segment so paths in api/*.ts (which start with /api/…) never double up.
+  apiBaseUrl: (process.env.API_BASE_URL ?? 'http://localhost:9003').trim().replace(/\/api\/?$/, ''),
   /** Must match api-v1 `TELEGRAM_BOT_SERVER_SECRET` — used for server-to-server /start sign-in. */
   telegramBotServerSecret: process.env.TELEGRAM_BOT_SERVER_SECRET ?? '',
   adminUsername: process.env.ADMIN_USERNAME ?? '',
