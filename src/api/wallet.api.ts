@@ -61,6 +61,7 @@ export async function getBadgeQuestions(token: string): Promise<BadgeQuestion[]>
 export interface AssignBadgeResult {
   badge: BadgeInfo | string;
   rank_tier?: number;
+  tier?: string;
 }
 
 export async function assignBadge(token: string, answers: string[]): Promise<AssignBadgeResult> {

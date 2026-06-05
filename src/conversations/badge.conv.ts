@@ -82,7 +82,8 @@ export async function handleBadgeCallback(ctx: BotContext, optionIndex: number):
   try {
     const result = await assignBadge(ctx.session.linkedAccount.accessToken, answers);
     await ctx.api.deleteMessage(ctx.chat!.id, loadingMsg.message_id).catch(() => null);
-    await ctx.reply(badgeDisplay(result.badge, result.rank_tier), { parse_mode: 'HTML' });
+    const tier = result.rank_tier ?? result.tier;
+    await ctx.reply(badgeDisplay(result.badge, tier), { parse_mode: 'HTML' });
   } catch (err: unknown) {
     await ctx.api.deleteMessage(ctx.chat!.id, loadingMsg.message_id).catch(() => null);
     const msg = err instanceof Error ? err.message : undefined;

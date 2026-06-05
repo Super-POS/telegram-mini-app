@@ -203,13 +203,13 @@ export function rewardProfile(reward: RewardInfo): string {
 
 // ─── Badge ───────────────────────────────────
 
-export function badgeDisplay(badge: BadgeInfo | string, rankTier?: number): string {
+export function badgeDisplay(badge: BadgeInfo | string, rankTier?: number | string): string {
   const name = typeof badge === 'string' ? badge : badge.name;
   const desc = typeof badge === 'object' && badge.description
     ? `\n<i>${badge.description}</i>`
     : '';
   const icon = typeof badge === 'object' && badge.emoji ? badge.emoji : '🏅';
-  const tier = rankTier != null ? `\n🎖 <b>Rank Tier:</b> ${rankTier}` : '';
+  const tier = rankTier != null && rankTier !== '' ? `\n🎖 <b>Rank Tier:</b> ${rankTier}` : '';
   return `${icon} <b>Your Badge</b>\n${THIN}\n<b>${name}</b>${desc}${tier}`;
 }
 
